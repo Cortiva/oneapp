@@ -344,14 +344,14 @@ class EmployeeService {
         take: limit,
       });
 
-      const totalUsers = await prisma.employee.count({
+      const total = await prisma.employee.count({
         where,
       });
       const pagination = {
-        total: totalUsers,
+        total: total,
         page,
         limit,
-        totalPages: Math.ceil(totalUsers / limit),
+        totalPages: Math.ceil(total / limit),
       };
 
       const response = {

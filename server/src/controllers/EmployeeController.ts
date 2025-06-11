@@ -5,7 +5,7 @@ import { employeeService } from "../services/EmployeeService";
 
 class EmployeeController {
   /**
-   * Onboard a new eployee
+   * Onboard a new employee
    * @param req
    * @param res
    */

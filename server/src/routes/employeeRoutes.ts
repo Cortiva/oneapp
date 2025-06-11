@@ -9,19 +9,19 @@ export default (router: express.Router) => {
     EmployeeController.onboardEmployee
   );
   router.put(
-    "/employees/update",
+    "/employees/:id/update",
     isITManager,
     EmployeeController.updateEmployee
   );
   router.put(
-    "/employees/update-avatar",
+    "/employees/:id/update-avatar",
     isITManager,
     EmployeeController.updateEmployeeAvatar
   );
   router.get(
-    "/users/get/:userId",
+    "/employees/get/:employeeId",
     isAuthenticated,
     EmployeeController.fetchEmployeeById
   );
-  router.get("/users/all", isITManager, EmployeeController.fetchEmployees);
+  router.get("/employees/all", isITManager, EmployeeController.fetchEmployees);
 };

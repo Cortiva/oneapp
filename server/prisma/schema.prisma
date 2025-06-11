@@ -59,73 +59,91 @@ model TokenBlacklist {
 }
 
 model User {
-  id                        String        @id @default(cuid())
-  email                     String        @unique
+  id                        String           @id @default(cuid())
+  email                     String           @unique
   password                  String
-  role                      Role          @default(IT_MANAGER)
+  role                      Role             @default(IT_MANAGER)
   lastLogin                 DateTime?
-  isActive                  Boolean       @default(true)
+  isActive                  Boolean          @default(true)
   refreshToken              String?
   staffId                   String
   firstName                 String
   lastName                  String
   phoneNumber               String
   officeLocation            String?
-  avatar                    String?       @default("https://res.cloudinary.com/etechds/image/upload/v1749650588/1_koh2sr.png")
+  avatar                    String?          @default("https://res.cloudinary.com/etechds/image/upload/v1749650588/1_koh2sr.png")
   verificationCode          String?
   verificationCodeExpiresAt DateTime?
   resetToken                String?
   resetTokenExpiresAt       DateTime?
-  accountStatus             AccountStatus @default(INACTIVE)
-  createdAt                 DateTime      @default(now())
-  updatedAt                 DateTime      @updatedAt
+  accountStatus             AccountStatus    @default(INACTIVE)
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime         @updatedAt
   employees                 Employee[]
+  iAssigned                 EmployeeDevice[] @relation("assigned")
+  iRetrieved                EmployeeDevice[] @relation("retrieved")
 
   @@index([email, firstName, lastName, role])
   @@map("users")
 }
 
 model Device {
-  id           String       @id @default(cuid())
-  assignedToId String
-  assignedTo   Employee     @relation(fields: [assignedToId], references: [id], onDelete: Cascade)
-  model        String?
-  manufacturer String?
-  screenSize   String?
-  processor    String?
-  ram          Int
-  storage      Int
-  status       DeviceStatus @default(AVAILABLE)
-  isDeleted    Boolean      @default(false)
-  lastAssigned DateTime?
-  imageUrl     String?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-
-  locations     Location[]
-  suitableRoles EmployeeRole[]
+  id              String           @id @default(cuid())
+  model           String?
+  manufacturer    String?
+  screenSize      String?
+  processor       String?
+  ram             Int
+  storage         Int
+  status          DeviceStatus     @default(AVAILABLE)
+  isDeleted       Boolean          @default(false)
+  images          String[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  totalUnits      Int              @default(1)
+  employeeDevices EmployeeDevice[]
 
   @@index([id, model, manufacturer, screenSize, ram, storage])
   @@map("devices")
 }
 
 model Employee {
-  id             String        @id @default(cuid())
+  id             String           @id @default(cuid())
   staffId        String
   firstName      String
   lastName       String
-  email          String        @unique
+  email          String           @unique
   phoneNumber    String
   officeLocation String
   role           EmployeeRole?
-  onboardingDate DateTime      @default(now())
+  onboardingDate DateTime         @default(now())
   onboardedById  String
-  onboardedBy    User          @relation(fields: [onboardedById], references: [id], onDelete: Cascade)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  devices        Device[]
+  onboardedBy    User             @relation(fields: [onboardedById], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  devices        EmployeeDevice[]
   avatar         String?
 
   @@index([firstName, lastName, email, phoneNumber, officeLocation, role])
   @@map("employees")
+}
+
+model EmployeeDevice {
+  id            String    @id @default(cuid())
+  employeeId    String
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  deviceId      String
+  device        Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  assignedOn    DateTime?
+  assignedById  String
+  assignedBy    User      @relation("assigned", fields: [assignedById], references: [id], onDelete: Cascade)
+  retrievedOn   DateTime?
+  retrievedById String
+  retrievedBy   User      @relation("retrieved", fields: [retrievedById], references: [id], onDelete: Cascade)
+  remark        String    @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([id, employeeId, deviceId, assignedOn])
+  @@map("employeeDevices")
 }
