@@ -138,9 +138,10 @@ model EmployeeDevice {
   assignedById  String
   assignedBy    User      @relation("assigned", fields: [assignedById], references: [id], onDelete: Cascade)
   retrievedOn   DateTime?
-  retrievedById String
-  retrievedBy   User      @relation("retrieved", fields: [retrievedById], references: [id], onDelete: Cascade)
-  remark        String    @db.Text
+  retrievedById String?
+  retrievedBy   User?     @relation("retrieved", fields: [retrievedById], references: [id], onDelete: Cascade)
+  remark        String?   @db.Text
+  isRetrieved   Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

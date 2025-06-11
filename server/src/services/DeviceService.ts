@@ -263,7 +263,7 @@ class DeviceService {
       const response = await prisma.device.update({
         where: { id },
         data: {
-          totalUnits: units,
+          totalUnits: { increment: units },
           updatedAt: new Date(),
         },
       });
@@ -345,7 +345,7 @@ class DeviceService {
   async getDeviceById(deviceId: string): Promise<any> {
     try {
       const record = await prisma.device.findFirst({
-        where: { id: deviceId },
+        where: { id: deviceId, isDeleted: false },
       });
 
       return ApiResponseBuilder.success(

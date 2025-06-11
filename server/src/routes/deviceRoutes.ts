@@ -21,7 +21,7 @@ export default (router: express.Router) => {
     DeviceController.deleteDevice
   );
   router.get(
-    "/devices/get/:DeviceId",
+    "/devices/get/:id",
     isAuthenticated,
     DeviceController.fetchDeviceById
   );
