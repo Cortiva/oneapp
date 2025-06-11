@@ -573,7 +573,7 @@ class UserService {
       // Update password in the database
       await prisma.user.update({
         where: { id: user.id },
-        data: { password: hashedPassword },
+        data: { password: hashedPassword, updatedAt: new Date() },
       });
 
       // Send email to user confirming password change
@@ -679,12 +679,12 @@ class UserService {
         role: userData?.role,
       };
 
-      const token = jwt.sign(jwtData, jwtSecret, { expiresIn: "5d" });
+      const token = jwt.sign(jwtData, jwtSecret, { expiresIn: "7d" });
 
       // Encrypt the token
       const responseData = {
         user: userData,
-        token: token,
+        token,
       };
 
       return ApiResponseBuilder.success(responseData, "Login successful");
@@ -746,15 +746,13 @@ class UserService {
    * @param lastName
    * @param phoneNumber
    * @param officeLocation
-   * @param avatar
    */
   async updateUser(
     userId: string,
     firstName?: string,
     lastName?: string,
     phoneNumber?: string,
-    officeLocation?: string,
-    avatar?: string
+    officeLocation?: string
   ): Promise<any> {
     try {
       // Update record
@@ -765,7 +763,7 @@ class UserService {
           lastName,
           phoneNumber,
           officeLocation,
-          avatar,
+          updatedAt: new Date(),
         },
         select: {
           id: true,
@@ -811,6 +809,7 @@ class UserService {
         where: { id: userId },
         data: {
           avatar: avatar,
+          updatedAt: new Date(),
         },
         select: {
           id: true,

@@ -124,6 +124,7 @@ model Employee {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   devices        Device[]
+  avatar         String?
 
   @@index([firstName, lastName, email, phoneNumber, officeLocation, role])
   @@map("employees")
