@@ -74,8 +74,6 @@ model User {
   avatar                    String?          @default("https://res.cloudinary.com/etechds/image/upload/v1749650588/1_koh2sr.png")
   verificationCode          String?
   verificationCodeExpiresAt DateTime?
-  resetToken                String?
-  resetTokenExpiresAt       DateTime?
   accountStatus             AccountStatus    @default(INACTIVE)
   createdAt                 DateTime         @default(now())
   updatedAt                 DateTime         @updatedAt

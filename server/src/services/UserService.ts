@@ -312,8 +312,8 @@ class UserService {
           id: user.id,
         },
         data: {
-          resetToken: utils.hashOtp(otp),
-          resetTokenExpiresAt: otpExpirationTime,
+          verificationCode: utils.hashOtp(otp),
+          verificationCodeExpiresAt: otpExpirationTime,
         },
       });
 
@@ -386,8 +386,8 @@ class UserService {
           id: user.id,
         },
         data: {
-          resetToken: utils.hashOtp(otp),
-          resetTokenExpiresAt: otpExpirationTime,
+          verificationCode: utils.hashOtp(otp),
+          verificationCodeExpiresAt: otpExpirationTime,
         },
       });
 
@@ -482,7 +482,7 @@ class UserService {
           );
         }
       } else {
-        if (user.resetToken !== hashedOtp) {
+        if (user.verificationCode !== hashedOtp) {
           return ApiResponseBuilder.error(
             "Provided OTP is invalid",
             StatusCodes.UNPROCESSABLE_ENTITY
@@ -490,11 +490,11 @@ class UserService {
         }
 
         // check if OTP is expired
-        const isInPast = utils.isTimeInPast(user.resetTokenExpiresAt!);
+        const isInPast = utils.isTimeInPast(user.verificationCodeExpiresAt!);
 
         if (isInPast) {
           return ApiResponseBuilder.error(
-            `Provided OTP has expired ::: ${user.resetTokenExpiresAt!}`,
+            `Provided OTP has expired ::: ${user.verificationCodeExpiresAt!}`,
             StatusCodes.UNPROCESSABLE_ENTITY
           );
         }
@@ -608,6 +608,7 @@ class UserService {
    */
   async signIn(email: string, password: string): Promise<any> {
     try {
+      logger.info(`Email: ${email}, Password: ${password}`);
       if (!email || !password) {
         return ApiResponseBuilder.error(
           "Email and password are required",
@@ -649,19 +650,19 @@ class UserService {
         },
       });
 
-      const user = await prisma.user.update({
-        where: { id: userData?.id },
-        data: {
-          lastLogin: new Date(),
-        },
-      });
-
       if (!userData) {
         return ApiResponseBuilder.error(
           "Invalid Email or password",
           StatusCodes.UNAUTHORIZED
         );
       }
+
+      const user = await prisma.user.update({
+        where: { email },
+        data: {
+          lastLogin: new Date(),
+        },
+      });
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
 

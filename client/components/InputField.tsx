@@ -1,7 +1,6 @@
 "use client";
 
 import { forwardRef, useState } from "react";
-import Text from "./Text";
 import { Eye, EyeClosed, Loader2 } from "lucide-react";
 
 export interface InputFieldProps {
@@ -13,6 +12,7 @@ export interface InputFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   showError?: boolean;
+  required?: boolean;
   min?: string;
   max?: string;
   step?: string;
@@ -44,6 +44,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       onChange,
       placeholder,
       showError,
+      required = false,
       min,
       max,
       step,
@@ -58,10 +59,8 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       hasMt = true,
       maxLength,
       hasCounter = false,
-      isPhoneInput = false,
       showProcessingIcon = false,
-      countryCode,
-      background = "bg-light-card dark:bg-dark-card",
+      background = "bg-light-bg dark:bg-dark-bg",
     },
     ref
   ) => {
@@ -69,24 +68,20 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
     const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
+    const hasError = required && showError && !value;
+
     return (
-      <div className={hasMt ? "mt-6" : ""}>
+      <div className={hasMt ? "mt-2" : ""}>
         {label && (
           <label
             htmlFor={id}
-            className="block leading-6 text-[#545454] dark:text-[#CBD5E1]"
+            className="block leading-6 text-[#545454] dark:text-[#CBD5E1] text-[13px]"
           >
             {label}
           </label>
         )}
 
-        <div className="mt-3 relative flex items-center space-x-3">
-          {isPhoneInput && (
-            <div className={`px-6 py-4 ${background} rounded-full`}>
-              <Text text={countryCode} />
-            </div>
-          )}
-
+        <div className="mt-1 relative flex items-center space-x-3">
           <input
             id={id}
             type={inputType}
@@ -106,7 +101,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             step={type === "time" ? step : undefined}
             className={`relative p-4 ${
               hasPrefix ? "pl-11" : ""
-            } rounded-full w-full text-[14px] md:text-[15px] lg:text-[16px] text-[#545454] dark:text-[#CBD5E1] ${background} drop-shadow-xs transition-all duration-200 ease-in-out focus:drop-shadow-sm focus:border-primary-300 dark:focus:border-primary-50 placeholder:text-slate-300 dark:placeholder:text-slate-600 ${
+            } rounded-[14px] w-full text-[14px] md:text-[15px] lg:text-[16px] text-[#545454] dark:text-[#CBD5E1] ${background} drop-shadow-xs transition-all duration-200 ease-in-out focus:drop-shadow-sm focus:border-primary-300 dark:focus:border-primary-50 placeholder:text-slate-300 dark:placeholder:text-slate-600 ${
               showError ? "border border-error dark:border-error-300" : ""
             } ${isDisabled ? "bg-light-bg dark:bg-dark-bg" : ""}`}
           />
@@ -115,13 +110,13 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
 
           {!showProcessingIcon && isPassword && (
             <span
-              className="absolute right-4 cursor-pointer"
+              className="absolute right-4 cursor-pointer p-2"
               onClick={togglePasswordVisibility}
             >
               {showPassword ? (
-                <Eye className="text-2xl" />
+                <Eye className="text-[#545454] dark:text-[#CBD5E1]" />
               ) : (
-                <EyeClosed className="text-2xl" />
+                <EyeClosed className="text-[#545454] dark:text-[#CBD5E1]" />
               )}
             </span>
           )}
@@ -141,9 +136,9 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
           </div>
         )}
 
-        {showError && (
+        {hasError && (
           <div className="text-error dark:text-error-300 mt-2 text-[12px]">
-            {errorText}
+            {errorText || `${label} is required`}
           </div>
         )}
       </div>

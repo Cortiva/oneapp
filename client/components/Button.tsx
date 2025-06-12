@@ -31,7 +31,7 @@ const Button: React.FC<ButtonProps> = ({
   const computedClass = `
     flex flex-wrap whitespace-nowrap justify-center items-center 
     rounded-full capitalize tracking-wider text-[14px] lg:text-[15px] 
-    px-5 lg:px-7 ${height} ${textColor} ${
+    px-5 lg:px-7 cursor-pointer ${height} ${textColor} ${
     isDisabled
       ? "bg-slate-200 text-gray-800"
       : isTextButton

@@ -41,7 +41,7 @@ class EmailService {
         companyName: config.APP_NAME,
         privacyPolicyUrl: config.PRIVACY,
         contactUrl: config.CONTACT_US,
-        website: config.WEBSITE,
+        companyWebsite: config.WEBSITE,
         logoUrl: config.LOGO_URL,
         supportEmail: config.EMAIL_FROM,
       };
@@ -58,7 +58,9 @@ class EmailService {
         html: emailHtml,
       };
 
-      await this.transporter.sendMail(mailOptions);
+      const response = await this.transporter.sendMail(mailOptions);
+
+      // logger.info(`Email SENT RESPONSE :::::::::== `, response);
 
       logger.info(
         `🎉🎉🎉🎉🎉🎉 Email Verification Email (${templateName}) sent to: ${email}`
@@ -90,7 +92,7 @@ class EmailService {
         companyName: config.APP_NAME,
         privacyPolicyUrl: config.PRIVACY,
         contactUrl: config.CONTACT_US,
-        website: config.WEBSITE,
+        companyWebsite: config.WEBSITE,
         logoUrl: config.LOGO_URL,
         supportEmail: config.EMAIL_FROM,
       };
@@ -142,7 +144,7 @@ class EmailService {
         companyName: config.APP_NAME,
         privacyPolicyUrl: config.PRIVACY,
         contactUrl: config.CONTACT_US,
-        website: config.WEBSITE,
+        companyWebsite: config.WEBSITE,
         logoUrl: config.LOGO_URL,
         supportEmail: config.EMAIL_FROM,
       };
@@ -194,7 +196,7 @@ class EmailService {
         companyName: config.APP_NAME,
         privacyPolicyUrl: config.PRIVACY,
         contactUrl: config.CONTACT_US,
-        website: config.WEBSITE,
+        companyWebsite: config.WEBSITE,
         logoUrl: config.LOGO_URL,
         supportEmail: config.EMAIL_FROM,
       };

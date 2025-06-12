@@ -9,10 +9,10 @@ export default (router: express.Router) => {
   router.post("/users/otp/send", UserController.sendOtp);
   router.put("/users/otp/verification", UserController.otpVerification);
   router.post(
-    "/users/password/initiate-reset/",
+    "/users/password/initiate-reset",
     UserController.initiatePasswordReset
   );
-  router.put("/users/password/change/", UserController.changePassword);
+  router.put("/users/password/change", UserController.changePassword);
   router.post("/users/login", UserController.signIn);
   router.post("/users/logout", UserController.signOut);
   router.put(

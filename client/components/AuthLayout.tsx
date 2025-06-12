@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import ThemeToggle from "./ThemeToggle";
+// import ThemeToggle from "./ThemeToggle";
 import AnimatedOnView from "./AnimatedOnView";
 import Image from "next/image";
 import { useTheme } from "next-themes";
@@ -18,9 +18,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <div className="flex flex-col justify-between items-center text-white text-center py-16 h-full">
             <div className="flex flex-row justify-between items-center">
               <div className="">
-                <div className="flex justify-end mb-4">
+                {/* <div className="flex justify-end mb-4">
                   <ThemeToggle />
-                </div>
+                </div> */}
                 <AnimatedOnView>
                   <h1 className="text-[13px] md:text-[20px] lg:text-[30px]">
                     Seamless Device
@@ -35,8 +35,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </div>
-      <div className="col-span-2 md:col-span-1 flex flex-col justify-center bg-light-bg dark:bg-dark-bg py-[50px] px-[5px] md:px-[30px] lg:px-[80px] xl:px-[110px] 2xl:px-[180px] overflow-y-auto">
-        <div>
+      <div className="col-span-2 md:col-span-1 flex flex-col justify-center bg-light-bg dark:bg-dark-bg py-[50px] px-[5px] md:px-[20px] lg:px-[40px] xl:px-[60px] 2xl:px-[110px] overflow-y-auto">
+        <div className="pt-24">
           <div className="flex flex-col items-center my-5">
             <AnimatedOnView>
               <Image
@@ -48,7 +48,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               />
             </AnimatedOnView>
           </div>
-          <div className="flex flex-col my-10 p-6 rounded-[20px] bg-light-card dark:bg-dark-card border-4 border-light-card dark:border-dark-card">
+          <div className="flex flex-col my-y p-6 rounded-[20px] bg-light-card dark:bg-dark-card border-4 border-light-card dark:border-dark-card">
             {children}
           </div>
         </div>
