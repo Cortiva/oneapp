@@ -10,8 +10,16 @@ class DeviceController {
    * @param res
    */
   static async addDevice(req: Request, res: Response): Promise<void> {
-    const { model, manufacturer, screenSize, processor, ram, storage, units } =
-      req.body;
+    const {
+      model,
+      manufacturer,
+      screenSize,
+      processor,
+      ram,
+      storage,
+      units,
+      location,
+    } = req.body;
 
     const response = await deviceService.addDevice(
       model,
@@ -20,7 +28,8 @@ class DeviceController {
       processor,
       ram,
       storage,
-      units
+      units,
+      location
     );
 
     if (response.success) {
@@ -45,8 +54,16 @@ class DeviceController {
    */
   static async updateDevice(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
-    const { model, manufacturer, screenSize, processor, ram, storage, units } =
-      req.body;
+    const {
+      model,
+      manufacturer,
+      screenSize,
+      processor,
+      ram,
+      storage,
+      units,
+      location,
+    } = req.body;
 
     const response = await deviceService.updateDevice(
       id,
@@ -56,7 +73,8 @@ class DeviceController {
       processor,
       ram,
       storage,
-      units
+      units,
+      location
     );
 
     if (response.success) {

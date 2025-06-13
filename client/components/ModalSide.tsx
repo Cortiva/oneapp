@@ -12,6 +12,7 @@ type ModalSideProps = {
   onClick?: () => void;
   isProcessing?: boolean;
   buttonText?: string;
+  isSingleButton?: boolean;
 };
 
 const ModalSide = ({
@@ -22,6 +23,7 @@ const ModalSide = ({
   onClick,
   isProcessing,
   buttonText,
+  isSingleButton = false,
 }: ModalSideProps) => {
   return (
     <AnimatePresence>
@@ -62,13 +64,15 @@ const ModalSide = ({
                 >
                   Close
                 </Button>
-                <Button
-                  isProcessing={isProcessing}
-                  isDisabled={isProcessing}
-                  onClick={onClick}
-                >
-                  {buttonText}
-                </Button>
+                {!isSingleButton && (
+                  <Button
+                    isProcessing={isProcessing}
+                    isDisabled={isProcessing}
+                    onClick={onClick}
+                  >
+                    {buttonText}
+                  </Button>
+                )}
               </div>
             </div>
           </motion.div>

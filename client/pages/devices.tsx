@@ -1,3 +1,4 @@
+import Avatar from "@/components/Avatar";
 import Breadcrumb from "@/components/Breadcrumb";
 import Button from "@/components/Button";
 import SearchableDropdown from "@/components/Dropdown";
@@ -11,8 +12,9 @@ import ModalSide from "@/components/ModalSide";
 import PaginationControls from "@/components/PaginationControls";
 import Text from "@/components/Text";
 import deviceService, { Device } from "@/services/deviceService";
+import { formatNumberN } from "@/utils/functions";
 import { locations } from "@/utils/items";
-import { Check, Plus, Search } from "lucide-react";
+import { Edit, Eye, Image, Plus, Search, Trash } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -45,6 +47,8 @@ export default function Home() {
   const [isUpdatingImages, setIsUpdatingImages] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDevice, setShowDevice] = useState(false);
+  const [currentImage, setCurrentImage] = useState(0);
   const [errors, setErrors] = useState({
     model: "",
     manufacturer: "",
@@ -186,7 +190,7 @@ export default function Home() {
         location,
       });
 
-      console.log(response);
+      console.log("Location", location);
 
       if (response.status === 201) {
         toast.success(response.message);
@@ -256,6 +260,7 @@ export default function Home() {
         setModalTitle("Add New Device");
         setButtonText("Save");
         setIsOpen(false);
+        handleResetForm();
       } else {
         toast.success(response.message);
       }
@@ -281,6 +286,7 @@ export default function Home() {
         toast.success(response.message);
         setOpenModal(false);
         fetchDevices();
+        handleResetForm();
       } else {
         toast.success(response.message);
       }
@@ -319,6 +325,7 @@ export default function Home() {
         setIsOpen(false);
         setProgress(50);
         setCurrentStep(1);
+        handleResetForm();
       } else {
         toast.success(response.message);
       }
@@ -328,6 +335,27 @@ export default function Home() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleResetForm = () => {
+    setModalTitle("Add New Device");
+    setButtonText("Save");
+    setDevice(null);
+    setModel("");
+    setImages([]);
+    setLocation("");
+    setManufacturer("");
+    setProcessor("");
+    setRam("");
+    setScreenSize("");
+    setStorage("");
+    setModel("");
+    setCurrentStep(1);
+    setProgress(50);
+    setDevice(null);
+    setIsDeleting(false);
+    setIsUpdating(false);
+    setIsOpen(false);
   };
 
   // Submit device Units update request
@@ -344,6 +372,7 @@ export default function Home() {
       if (response.status === 201) {
         toast.success(response.message);
         fetchDevices();
+        handleResetForm();
       } else {
         toast.success(response.message);
       }
@@ -363,6 +392,24 @@ export default function Home() {
     setLocation(value);
   };
 
+  const handleViewRecord = (item: Device) => {
+    setDevice(item);
+    setShowDevice(true);
+    console.log(item);
+  };
+
+  const handlePrev = () => {
+    setCurrentImage((prev) =>
+      prev === 0 ? device!.images.length - 1 : prev - 1
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentImage((prev) =>
+      prev === device!.images.length - 1 ? 0 : prev + 1
+    );
+  };
+
   return (
     <MainLayout>
       <Breadcrumb
@@ -376,24 +423,13 @@ export default function Home() {
         }
       />
 
-      {filteredDevices.length > 0 && (
+      {devices.length > 0 && (
         <div className="flex flex-col bg-light-card dark:bg-dark-card mt-10 p-1 rounded-[14px]">
           <div className="grid grid-cols-2 gap-10 mb-6">
             <div className="col-span-2 lg:col-span-1"></div>
             <div className="col-span-2 lg:col-span-1">
               <div className="flex flex-row justify-end items-center">
-                {selectedRows.length > 0 && (
-                  <div className="flex flex-row space-x-4 mt-6">
-                    <Button
-                      isDeleteButton={true}
-                      isProcessing={isProcessing}
-                      isDisabled={isProcessing}
-                      onClick={() => console.log("")}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                )}
+                <div></div>
                 <div className="w-[70%] ml-4">
                   <InputField
                     id="email"
@@ -409,52 +445,27 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-6">
-            <table className="w-full border-collapse min-w-max">
+          <div className="w-full overflow-x-auto mt-6 shadow-[0_4px_2px_-2px_rgba(0,0,0,0.1)] mb-6">
+            <table className="min-w-[1000px] w-full border-collapse">
               <thead>
-                <tr className="bg-white border-b border-border text-[13px]">
-                  <th className="w-[35%]">
-                    <div className="flex items-center py-4 px-4">
-                      <div
-                        className={`flex justify-center items-center rounded-md h-[20px] w-[20px] mr-2 cursor-pointer ${
-                          selectedRows.length === filteredDevices.length
-                            ? "border border-primary-600 bg-primary text-white"
-                            : "border border-border"
-                        }`}
-                        onClick={selectAll}
-                      >
-                        {selectedRows.length === filteredDevices.length && (
-                          <Check />
-                        )}
-                      </div>
-                      <Text text="Basic Info" />
-                    </div>
-                  </th>
-                  <th className="w-[10%]">
-                    <div className="flex flex-row items-center px-4">
-                      Status
-                    </div>
-                  </th>
-                  <th className="w-[15%]">
-                    <div className="flex flex-row items-center px-4">
-                      Email & Phone Number
-                    </div>
-                  </th>
-                  <th className="w-[15%]">
-                    <div className="flex flex-row items-center px-4">
-                      Registration Number
-                    </div>
-                  </th>
-                  <th className="w-[15%]">
-                    <div className="flex flex-row items-center px-4">
-                      Country/Region
-                    </div>
-                  </th>
-                  <th className="w-[10%]">
-                    <div className="flex flex-row items-center px-4">
-                      Jobs Posted
-                    </div>
-                  </th>
+                <tr className="shadow-[0_4px_2px_-2px_rgba(0,0,0,0.1)] text-[13px]">
+                  {[
+                    "Model",
+                    "Units",
+                    "Location",
+                    "Processor",
+                    "Storage",
+                    "Screen",
+                    "Status",
+                    "Actions",
+                  ].map((title) => (
+                    <th
+                      key={title}
+                      className="text-left px-4 py-4 whitespace-nowrap"
+                    >
+                      <Text text={title} />
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -463,64 +474,79 @@ export default function Home() {
                     key={row.id}
                     className={`${
                       filteredDevices.length - 1 > index
-                        ? "border-b border-border"
+                        ? "shadow-[0_4px_2px_-2px_rgba(0,0,0,0.1)]"
                         : ""
                     }`}
                   >
-                    <td className="w-[25%] cursor-pointer">
-                      <div className="flex items-center py-4 px-4">
-                        <div
-                          className={`flex justify-center items-center rounded-md h-[20px] w-[20px] mr-2 cursor-pointer ${
-                            selectedRows.includes(row.id)
-                              ? "border border-primary-600 bg-primary text-white"
-                              : "border border-border"
-                          }`}
-                          onClick={() => toggleSelect(row.id)}
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-2">
+                        <Avatar imageUrl={row.images[0]} username={row.model} />
+                        <div className="">
+                          <Text text={row.manufacturer} size="small" />
+                          <Text text={row.model} />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <Text text={formatNumberN(row.totalUnits)} />
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <Text text={row.location} />
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <Text text={row.processor} />
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex flex-col">
+                        <Text text={`${row.ram} RAM`} size="small" />
+                        <Text text={`${row.storage} GB`} />
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <Text text={`${row.screenSize} "`} />
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div
+                        className={`flex items-center space-x-2 rounded-full px-2 py-1 text-white text-[14px] ${
+                          row.status === "Deleted"
+                            ? "bg-[#E30045]"
+                            : row.status === "Unverified"
+                            ? "bg-amber-500"
+                            : row.status === "Inactive"
+                            ? "bg-slate-800"
+                            : "bg-[#12B76A]"
+                        }`}
+                      >
+                        <div className="w-2 h-2 bg-white rounded-full mr-1"></div>
+                        {row.status.toLowerCase()}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleViewRecord(row)}
+                          className="p-1 cursor-pointer text-primary"
                         >
-                          {selectedRows.includes(row.id) && <Check />}
-                        </div>
-                        <div className="ml-2 flex flex-row items-center space-x-3">
-                          <Text text={`${row.model}`} />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="w-[20%]">
-                      <div className={`flex py-4 px-4`}>
-                        <div
-                          className={`flex space-x-2 items-center rounded-full py-1 px-3 text-white ${
-                            row.status === "Deleted"
-                              ? "bg-[#E30045]"
-                              : row.status === "Unverified"
-                              ? "bg-amber-500"
-                              : row.status === "Inactive"
-                              ? "bg-slate-800"
-                              : "bg-[#12B76A]"
-                          } `}
+                          <Eye />
+                        </button>
+                        <button
+                          onClick={() => handleInitiateDeviceUpdate(row)}
+                          className="p-1 cursor-pointer text-yellow-400 text-black"
                         >
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                          <Text text={row.status} />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="w-[20%]">
-                      <div className="flex flex-col py-4 px-4">
-                        <Text text={row.manufacturer} />
-                        <Text text={row.processor ?? ""} />
-                      </div>
-                    </td>
-                    <td className="w-[10%]">
-                      <div className="flex items-center py-4 px-4">
-                        <Text text={row.storage} />
-                      </div>
-                    </td>
-                    <td className="w-[15%]">
-                      <div className="flex items-center py-4 px-4">
-                        <Text text={`${row.location}, ${row.isDeleted}`} />
-                      </div>
-                    </td>
-                    <td className="w-[10%]">
-                      <div className="flex items-center py-4 px-4">
-                        <Text text={`f`} />
+                          <Edit />
+                        </button>
+                        <button
+                          onClick={() => handleInitiateDeviceImagesUpdate(row)}
+                          className="p-1 cursor-pointer text-purple-600"
+                        >
+                          <Image />
+                        </button>
+                        <button
+                          onClick={() => handleInitiateDeviceDelete(row)}
+                          className="p-1 cursor-pointer text-red-500"
+                        >
+                          <Trash />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -540,7 +566,7 @@ export default function Home() {
         </div>
       )}
 
-      {filteredDevices.length < 1 && (
+      {devices.length < 1 && (
         <AppEmptyState
           text="No device found"
           page="Device"
@@ -722,6 +748,68 @@ export default function Home() {
       >
         <Text text="Are you sure you want to delete this device?. This action is not reversible, we encourage you to get proper approvals before proceeding with device deletion." />
       </Modal>
+
+      <ModalSide
+        isOpen={showDevice}
+        onClose={() => setShowDevice(false)}
+        title={"Viewing Device Information"}
+        isSingleButton={true}
+      >
+        <div className="flex flex-col space-y-2 mb-6">
+          <div className="relative h-72 md:h-96 bg-black">
+            <img
+              src={device?.images[currentImage]}
+              alt="Device"
+              className="w-full h-full object-cover"
+            />
+            <button
+              onClick={handlePrev}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/50 hover:bg-white rounded-full p-2 text-black"
+            >
+              &#8592;
+            </button>
+            <button
+              onClick={handleNext}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/50 hover:bg-white rounded-full p-2 text-black"
+            >
+              &#8594;
+            </button>
+
+            <div className="absolute bottom-4 w-full flex justify-center gap-2">
+              {device?.images.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentImage(idx)}
+                  className={`w-2 h-2 rounded-full ${
+                    idx === currentImage ? "bg-white" : "bg-gray-400"
+                  }`}
+                ></button>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <Detail label="Model" value={device?.model} />
+            <Detail label="Manufacturer" value={device?.manufacturer} />
+            <Detail label="Location" value={device?.location} />
+            <Detail label="Processor" value={device?.processor} />
+            <Detail label="RAM" value={`${device?.ram} GB`} />
+            <Detail label="Storage" value={`${device?.storage} GB`} />
+            <Detail label="Screen Size" value={`${device?.screenSize}\"`} />
+            <Detail label="Units Available" value={device?.totalUnits} />
+            <Detail label="Status" value={device?.status} />
+          </div>
+        </div>
+      </ModalSide>
     </MainLayout>
   );
 }
+
+const Detail = ({ label, value }) => (
+  <div className="flex flex-col">
+    <span className="text-gray-500 dark:text-gray-300 font-medium">
+      {label}
+    </span>
+    <span className="text-gray-800 dark:text-white">{value}</span>
+  </div>
+);

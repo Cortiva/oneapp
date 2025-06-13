@@ -23,7 +23,8 @@ class DeviceService {
     processor: string,
     ram: number,
     storage: string,
-    units: number
+    units: number,
+    location: any
   ): Promise<any> {
     try {
       const requiredFields = {
@@ -34,6 +35,7 @@ class DeviceService {
         ram: "Device RAM is required",
         storage: "Device storage is required",
         units: "Total units is required",
+        location: "Location is required",
       };
       const errors = utils.validateRequiredFields(requiredFields, {
         model,
@@ -43,6 +45,7 @@ class DeviceService {
         ram,
         storage,
         units,
+        location,
       });
 
       if (errors.length > 0) {
@@ -81,6 +84,7 @@ class DeviceService {
           ram,
           storage,
           totalUnits: units,
+          location,
         },
       });
 
@@ -109,6 +113,7 @@ class DeviceService {
    * @param ram
    * @param storage
    * @param units
+   * @param location
    * @returns
    */
   async updateDevice(
@@ -119,7 +124,8 @@ class DeviceService {
     processor?: string,
     ram?: number,
     storage?: string,
-    units?: number
+    units?: number,
+    location?: any
   ): Promise<any> {
     try {
       if (!id) {
@@ -149,6 +155,7 @@ class DeviceService {
           ram,
           storage,
           totalUnits: units,
+          location,
         },
       });
 
