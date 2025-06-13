@@ -99,6 +99,7 @@ model Device {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   totalUnits      Int              @default(1)
+  location        Location         @default(UK)
   employeeDevices EmployeeDevice[]
 
   @@index([id, model, manufacturer, screenSize, ram, storage])

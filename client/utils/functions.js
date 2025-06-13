@@ -1,3 +1,7 @@
+import CryptoJS from "crypto-js";
+
+const secretKey = process.env.SECRET_KEY || "";
+
 export const formatNumberN = (number, decimals = 0) => {
   const num = Number(number);
   const formattedNumber = num.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -17,4 +21,21 @@ export const hasEmptyValue = (data) => {
 export const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+}
+
+
+export const encryptData = (data) => {
+    return CryptoJS.AES.encrypt(JSON.stringify(data), secretKey).toString()
+}
+
+export const decryptData = (cipherText) => {
+    const bytes = CryptoJS.AES.decrypt(cipherText, secretKey)
+    return JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
+}
+
+export const formatRole = (role)  => {
+  return role
+    .toLowerCase()       
+    .replace(/_/g, ' ')     
+    .replace(/\b\w/g, c => c.toUpperCase()); 
 }

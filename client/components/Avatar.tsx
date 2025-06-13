@@ -17,9 +17,9 @@ const Avatar: React.FC<AvatarProps> = ({ imageUrl, username }) => {
   };
 
   return (
-    <div className="rounded-full bg-light-bg dark:bg-dark-bg flex justify-center items-center h-[45px] w-[45px] 2xl:h-[65px] 2xl:w-[65px] overflow-hidden">
+    <div className="rounded-full bg-light-bg dark:bg-dark-bg flex justify-center items-center h-[40px] w-[40px] 2xl:h-[55px] 2xl:w-[55px] overflow-hidden">
       {imageUrl ? (
-        <Image src={imageUrl} alt={username} height={120} width={120} />
+        <Image src={imageUrl} alt={username} height={50} width={50} />
       ) : (
         <Text text={getInitials(username)} weight="font-semibold" />
       )}

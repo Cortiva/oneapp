@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
+import { encryptData } from "@/utils/functions";
 
 export default function Login() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -31,8 +32,15 @@ export default function Login() {
         setUsername(
           `${response.data.user.firstName} ${response.data.user.lastName}`
         );
-        const token = response.data.token;
+
+        // Encrypt user and token before storing on local storage
+        const user = encryptData(response.data.user);
+        const token = encryptData(response.data.token);
+
+        localStorage.setItem("oau", user);
+
         Cookies.set("token", token, { expires: 7 });
+
         router.replace("/");
       } else {
         toast.error("Login failed");

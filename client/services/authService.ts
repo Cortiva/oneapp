@@ -31,6 +31,22 @@ interface LoginResponse {
   };
 }
 
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  accountStatus: string;
+  createdAt: string;
+  avatar: string;
+  lastLogin: string;
+  role: string;
+  isActive: string;
+  staffId: string;
+  phoneNumber: string;
+  officeLocation: string;
+}
+
 interface RegisterRequest {
   firstName: string;
   lastName: string;
@@ -227,12 +243,9 @@ const authService = {
    * @param token
    * @returns Promise with success message
    */
-  signOut: async (passwordData: ChangePasswordRequest): Promise<any> => {
+  signOut: async (): Promise<any> => {
     try {
-      const response: AxiosResponse<any> = await api.put(
-        "/users/logout",
-        passwordData
-      );
+      const response: AxiosResponse<any> = await api.get("/users/logout");
       return response.data;
     } catch (error) {
       throw handleError(error as AxiosError);

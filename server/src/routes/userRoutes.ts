@@ -6,7 +6,7 @@ export default (router: express.Router) => {
   router.post("/check-email", UserController.checkEmailAvailability);
   router.post("/users/register/admin", UserController.registerAdmin);
   router.post("/users/register/user", UserController.registerUser);
-  router.post("/users/otp/send", UserController.sendOtp);
+  router.get("/users/otp/send", UserController.sendOtp);
   router.put("/users/otp/verification", UserController.otpVerification);
   router.post(
     "/users/password/initiate-reset",

@@ -1,30 +1,44 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { LayoutDashboard, Users2, Laptop2, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  LayoutDashboard,
+  Users2,
+  Laptop2,
+  Users,
+  Menu,
+  X,
+  Expand,
+  Minimize,
+} from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
-import { toast } from "react-toastify";
 import Text from "./Text";
+import { decryptData, formatRole } from "@/utils/functions";
+import { User } from "@/services/authService";
+import ThemeToggle from "./ThemeToggle";
+import Avatar from "./Avatar";
+import { useTheme } from "next-themes";
+import Image from "next/image";
 
 const Header = () => {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const { theme } = useTheme();
 
   useEffect(() => {
-    if (!currentUser) {
-      console.log("No User Loaded");
+    const storedUser = localStorage.getItem("oau");
+    if (!storedUser) {
+      console.log("No User found");
     } else {
-      try {
-        setUser(currentUser);
-      } catch (error) {
-        console.error("Failed to parse user data:", error);
-      }
+      // Decrypt stored user
+      const decryptedUser = decryptData(storedUser);
+      console.log("dec user :::::: ", decryptedUser);
+      setUser(decryptedUser);
     }
-  }, [currentUser]);
+  }, [setUser]);
 
   const handleFullScreenClicked = () => {
     if (!isFullScreen && typeof document !== "undefined") {
@@ -38,21 +52,7 @@ const Header = () => {
     }
   };
 
-  const handleLockScreen = async () => {
-    console.log("Lock screen triggered");
-  };
-
-  const handleLogout = async () => {
-    try {
-      dispatch(logOut());
-      router.push("/login");
-    } catch (err) {
-      console.log(err.data);
-      toast.error(`Logout error: ${err?.data?.data?.message || err.data}`);
-    }
-  };
-
-  const to = (page) => {
+  const to = (page: string) => {
     setShowMenu(false);
     router.push(page);
   };
@@ -73,33 +73,6 @@ const Header = () => {
     }
   }, []);
 
-  const handleDropdownMenu = (type, status) => {
-    if (type === "profile") {
-      setIsProfileOpen(status);
-    }
-  };
-
-  const profileUrls = [
-    {
-      title: "Profile",
-      url: "/profile",
-      isLink: true,
-      icon: <User size={18} color="currentColor" />,
-    },
-    {
-      title: "Help",
-      url: "/",
-      isLink: false,
-      icon: <InfoCircle size={18} color="currentColor" />,
-    },
-    {
-      title: "Sign Out",
-      url: "/",
-      isLink: false,
-      icon: <Logout size={18} color="currentColor" />,
-    },
-  ];
-
   const adminMenu = [
     { title: "Dashboard", url: "/", icon: <LayoutDashboard size={18} /> },
     { title: "Employees", url: "/employees", icon: <Users2 size={18} /> },
@@ -116,23 +89,21 @@ const Header = () => {
       {!showMenu && (
         <div className="h-[8%] flex justify-between items-center bg-light-card dark:bg-dark-card pl-5 lg:pl-10 shadow-[0_4px_2px_-2px_rgba(0,0,0,0.1)]">
           <div className="md:hidden cursor-pointer" onClick={toggleShowMenu}>
-            <RiMenu4Line size={20} color="#0097B2" />
+            <Menu size={20} />
           </div>
+          <div></div>
 
           <div className="h-full flex items-center">
-            <div className="flex items-center px-3 cursor-pointer hover:bg-primary/30 text-[#545454] dark:text-white text-2xl">
+            <div className="flex items-center px-1 cursor-pointer text-[#545454] dark:text-white">
               {!isFullScreen ? (
-                <RiFullscreenLine onClick={handleFullScreenClicked} />
+                <Expand size={20} onClick={handleFullScreenClicked} />
               ) : (
-                <RiFullscreenExitLine onClick={handleExitFullScreenClicked} />
+                <Minimize size={20} onClick={handleExitFullScreenClicked} />
               )}
             </div>
 
-            <div
-              className="flex items-center px-3 cursor-pointer hover:bg-primary/30 text-[#545454] dark:text-white text-2xl"
-              onClick={toggleTheme}
-            >
-              {theme === "light" ? <RiSunLine /> : <RiMoonLine />}
+            <div className="flex items-center px-1 cursor-pointer text-[#545454] dark:text-white">
+              <ThemeToggle />
             </div>
 
             <div className="relative px-5">
@@ -140,75 +111,23 @@ const Header = () => {
                 {user && (
                   <div
                     className="flex items-center pr-2"
-                    onClick={() =>
-                      handleDropdownMenu("profile", !isProfileOpen)
-                    }
+                    onClick={() => to("/profile")}
                   >
                     <Avatar
-                      imageUrl={user.imageUrl}
+                      imageUrl={user.avatar}
                       username={`${user.firstName} ${user.lastName}`}
-                      borderColor="primary"
                     />
                     <div className="flex-col pl-3">
                       <Text
                         text={`${user.firstName} ${user.lastName}`}
                         weight="font-semibold"
                       />
-                      <Text text={user.roles[0]} size="small" />
+                      <Text text={formatRole(user.role)} size="small" />
                     </div>
                   </div>
                 )}
-
-                <div
-                  className={`absolute right-0 mt-1 w-[300px] bg-light-card dark:bg-dark-card shadow-xl rounded ${
-                    isProfileOpen ? "block" : "hidden"
-                  }`}
-                >
-                  <ul>
-                    {profileUrls.slice(0, 4).map((url, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center py-3 px-4 hover:bg-light-bg dark:hover:bg-dark-bg"
-                        onClick={() => {
-                          setIsProfileOpen(false);
-                          to(url.url);
-                        }}
-                      >
-                        <IconHolder>{url.icon}</IconHolder>
-                        <span className="ml-2">
-                          <Text text={url.title} />
-                        </span>
-                      </li>
-                    ))}
-                    <li className="h-[1px] w-full bg-light-bg dark:bg-dark-bg"></li>
-                    <li>
-                      <div className="flex w-full">
-                        {profileUrls.slice(-2).map((url2, index) => (
-                          <div
-                            key={index}
-                            className={`w-1/2 flex justify-center items-center hover:bg-light-bg dark:hover:bg-dark-bg py-3 border-r ${
-                              index !== 0
-                                ? "border-light-bg dark:border-dark-bg"
-                                : ""
-                            }`}
-                            onClick={
-                              index === 0 ? handleLockScreen : handleLogout
-                            }
-                          >
-                            <IconHolder>{url2.icon}</IconHolder>
-                            <span className="ml-2">
-                              <Text text={url2.title} />
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </li>
-                  </ul>
-                </div>
               </div>
             </div>
-
-            <DigitalClock militaryTime={false} separatorBlink={true} />
           </div>
         </div>
       )}
@@ -217,11 +136,17 @@ const Header = () => {
         <div className="h-screen w-full bg-slate-900 dark:bg-slate-800 flex flex-col shadow-[4px_0_6px_-1px_rgba(0,0,0,0.1)]">
           <div className="h-[8%] flex justify-between items-center px-5">
             <div className="flex items-center text-[37px] text-white font-semibold">
-              <img src={images.iconLight} width={50} alt="Staze" />
+              <Image
+                src={theme === "dark" ? "/logodark.png" : "/logolight.png"}
+                alt="oneapp"
+                width={200}
+                height={63}
+                className="object-contain"
+              />
               <span className="ml-2">staze</span>
             </div>
             <div className="cursor-pointer" onClick={() => setShowMenu(false)}>
-              <CloseSquare color="#FFFFFF" size={33} />
+              <X color="#FFFFFF" size={33} />
             </div>
           </div>
 

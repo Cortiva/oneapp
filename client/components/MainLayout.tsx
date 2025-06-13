@@ -1,6 +1,4 @@
 import { ReactNode, useEffect, useState } from "react";
-import AnimatedOnView from "./AnimatedOnView";
-import Image from "next/image";
 import Footer from "./Footer";
 import Sidebar from "./Sidebar";
 import Header from "./Header";

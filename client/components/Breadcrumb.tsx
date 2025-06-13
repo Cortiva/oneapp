@@ -6,21 +6,15 @@ type BreadcrumbProps = {
   title: string;
   count: number;
   actions?: React.ReactNode;
-  color?: string;
 };
 
-const Breadcrumb: React.FC<BreadcrumbProps> = ({
-  title,
-  count,
-  actions,
-  color = "text-white",
-}) => {
+const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, count, actions }) => {
   return (
     <div className="flex flex-row justify-between items-center">
       <div className="flex flex-row space-x-5 items-center">
-        <Text text={title} isTitleText titleColor={color} />
-        <div className="flex flex-row items-center justify-center bg-secondary rounded-full h-[30px] px-4 text-[12px] text-white">
-          {`${formatNumberN(count)} ${title}`}
+        <Text text={title} isTitleText={true} />
+        <div className="flex flex-row items-center justify-center bg-light-card dark:bg-dark-card rounded-full h-[35px] px-4 text-[14px]">
+          <Text text={`${formatNumberN(count)} in total`} weight="font-bold" />
         </div>
       </div>
       {actions}

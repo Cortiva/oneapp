@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-// import ThemeToggle from "./ThemeToggle";
 import AnimatedOnView from "./AnimatedOnView";
 import Image from "next/image";
 import { useTheme } from "next-themes";
@@ -18,9 +17,6 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <div className="flex flex-col justify-between items-center text-white text-center py-16 h-full">
             <div className="flex flex-row justify-between items-center">
               <div className="">
-                {/* <div className="flex justify-end mb-4">
-                  <ThemeToggle />
-                </div> */}
                 <AnimatedOnView>
                   <h1 className="text-[13px] md:text-[20px] lg:text-[30px]">
                     Seamless Device
