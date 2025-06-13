@@ -43,6 +43,7 @@ export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [openModal, setOpenModal] = useState(false);
   const [isUpdatingImages, setIsUpdatingImages] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errors, setErrors] = useState({
     model: "",
@@ -189,6 +190,7 @@ export default function Home() {
 
       if (response.status === 201) {
         toast.success(response.message);
+        setDevice(response.data);
         setProgress(100);
         setCurrentStep(2);
         setIsUpdatingImages(true);
@@ -219,6 +221,7 @@ export default function Home() {
     setModel(item.totalUnits.toString());
     setCurrentStep(1);
     setProgress(50);
+    setIsUpdating(true);
     setIsOpen(true);
   };
 
@@ -249,11 +252,10 @@ export default function Home() {
 
       if (response.status === 201) {
         toast.success(response.message);
-        setProgress(100);
-        setCurrentStep(2);
         fetchDevices();
         setModalTitle("Add New Device");
         setButtonText("Save");
+        setIsOpen(false);
       } else {
         toast.success(response.message);
       }
@@ -313,9 +315,10 @@ export default function Home() {
 
       if (response.status === 201) {
         toast.success(response.message);
-        setProgress(100);
-        setCurrentStep(2);
         fetchDevices();
+        setIsOpen(false);
+        setProgress(50);
+        setCurrentStep(1);
       } else {
         toast.success(response.message);
       }
@@ -551,7 +554,14 @@ export default function Home() {
         onClose={() => setIsOpen(false)}
         title={modalTitle}
         buttonText={buttonText}
-        onClick={device ? handleUpdateSubmit : handleNewSubmit}
+        isProcessing={isProcessing}
+        onClick={
+          isUpdatingImages
+            ? handleUpdateDeviceImages
+            : isUpdating
+            ? handleUpdateSubmit
+            : handleNewSubmit
+        }
       >
         <div className="flex flex-col space-y-2 mb-6">
           <Text
@@ -600,7 +610,7 @@ export default function Home() {
                     onSelect={handleSelect}
                   />
                 </div>
-                <div className="col-span-2 md:col-span-1">
+                <div className="col-span-2 md:col-span-1 pt-6">
                   <InputField
                     id={`model`}
                     label={`Device Model`}
