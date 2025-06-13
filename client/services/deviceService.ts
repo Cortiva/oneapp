@@ -45,6 +45,7 @@ interface RegisterDeviceRequest {
   ram: number;
   storage: string;
   units: number;
+  location: string;
 }
 
 interface ApiError {
