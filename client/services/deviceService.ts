@@ -37,13 +37,14 @@ export interface Device {
 }
 
 interface RegisterDeviceRequest {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  staffId: string;
-  phoneNumber: string;
-  officeLocation: string;
+  id?: string;
+  model: string;
+  manufacturer: string;
+  screenSize: string;
+  processor: string;
+  ram: number;
+  storage: string;
+  units: number;
 }
 
 interface ApiError {
@@ -73,8 +74,84 @@ const deviceService = {
   ): Promise<FetchDeviceResponse> => {
     try {
       const response: AxiosResponse<FetchDeviceResponse> = await api.post(
-        "/users/login",
+        "/devices/add",
         credentials
+      );
+      return response.data;
+    } catch (error) {
+      throw handleError(error as AxiosError);
+    }
+  },
+
+  /**
+   * Update existing device
+   * @param credentials
+   * @returns
+   */
+  updateDevice: async (
+    id: string,
+    credentials: RegisterDeviceRequest
+  ): Promise<FetchDeviceResponse> => {
+    try {
+      const response: AxiosResponse<FetchDeviceResponse> = await api.put(
+        `/devices/${id}/update`,
+        credentials
+      );
+      return response.data;
+    } catch (error) {
+      throw handleError(error as AxiosError);
+    }
+  },
+
+  /**
+   * Update device images
+   * @param credentials
+   * @returns
+   */
+  updateDeviceImages: async (
+    id: string,
+    images: string[]
+  ): Promise<FetchDeviceResponse> => {
+    try {
+      const response: AxiosResponse<FetchDeviceResponse> = await api.put(
+        `/devices/${id}/images`,
+        { images }
+      );
+      return response.data;
+    } catch (error) {
+      throw handleError(error as AxiosError);
+    }
+  },
+
+  /**
+   * Update existing device units
+   * @param credentials
+   * @returns
+   */
+  updateDeviceUnits: async (
+    id: string,
+    units: number
+  ): Promise<FetchDeviceResponse> => {
+    try {
+      const response: AxiosResponse<FetchDeviceResponse> = await api.put(
+        `/devices/${id}/units`,
+        { units }
+      );
+      return response.data;
+    } catch (error) {
+      throw handleError(error as AxiosError);
+    }
+  },
+
+  /**
+   * delete existing device
+   * @param credentials
+   * @returns
+   */
+  deleteDevice: async (id: string): Promise<FetchDeviceResponse> => {
+    try {
+      const response: AxiosResponse<FetchDeviceResponse> = await api.delete(
+        `/devices/${id}/delete`
       );
       return response.data;
     } catch (error) {

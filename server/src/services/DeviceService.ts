@@ -22,7 +22,7 @@ class DeviceService {
     screenSize: string,
     processor: string,
     ram: number,
-    storage: number,
+    storage: string,
     units: number
   ): Promise<any> {
     try {
@@ -118,7 +118,7 @@ class DeviceService {
     screenSize?: string,
     processor?: string,
     ram?: number,
-    storage?: number,
+    storage?: string,
     units?: number
   ): Promise<any> {
     try {

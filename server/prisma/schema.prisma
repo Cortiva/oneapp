@@ -92,7 +92,7 @@ model Device {
   screenSize      String?
   processor       String?
   ram             Int
-  storage         Int
+  storage         String
   status          DeviceStatus     @default(AVAILABLE)
   isDeleted       Boolean          @default(false)
   images          String[]
