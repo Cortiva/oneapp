@@ -48,6 +48,14 @@ export interface EmployeeDevice {
   remark?: string;
 }
 
+interface AssignDeviceRequest {
+  employeeId?: string;
+  deviceId?: string;
+  assignedOn?: any;
+  assignedById?: string;
+  remark?: string;
+}
+
 interface RegisterEmployeeRequest {
   id?: string;
   firstName: string;
@@ -109,6 +117,25 @@ const employeeService = {
     try {
       const response: AxiosResponse<FetchEmployeeResponse> = await api.put(
         `/employees/${id}/update`,
+        credentials
+      );
+      return response.data;
+    } catch (error) {
+      throw handleError(error as AxiosError);
+    }
+  },
+
+  /**
+   * assignDeviceTo existing Employee
+   * @param credentials
+   * @returns
+   */
+  assignDeviceToEmployee: async (
+    credentials: AssignDeviceRequest
+  ): Promise<any> => {
+    try {
+      const response: AxiosResponse<any> = await api.post(
+        `/employee/devices/assign`,
         credentials
       );
       return response.data;

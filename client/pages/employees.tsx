@@ -10,13 +10,15 @@ import ModalSide from "@/components/ModalSide";
 import PaginationControls from "@/components/PaginationControls";
 import Text from "@/components/Text";
 import employeeService, { Employee } from "@/services/employeeService";
-import { decryptData, formatNumberN } from "@/utils/functions";
+import { decryptData } from "@/utils/functions";
 import { locations, roles } from "@/utils/items";
 import { Eye, Plus, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { User } from "@/services/authService";
 import Image from "next/image";
+import deviceService, { Device } from "@/services/deviceService";
+import OtherDevicesSection from "@/components/OtherDevices";
 
 export default function Employees() {
   const [user, setUser] = useState<User | null>(null);
@@ -25,8 +27,10 @@ export default function Employees() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [employees, setEmployees] = useState<Employee[] | []>([]);
+  const [devices, setDevices] = useState<Device[] | []>([]);
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchDeviceTerm, setSearchDeviceTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -54,6 +58,12 @@ export default function Employees() {
     officeLocation: "",
   });
 
+  const [currentImage, setCurrentImage] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [recommendedDevice, setRecommendedDevice] = useState<Device | null>(
+    null
+  );
+
   useEffect(() => {
     const storedUser = localStorage.getItem("oau");
     if (!storedUser) {
@@ -66,6 +76,25 @@ export default function Employees() {
     }
   }, [setUser]);
 
+  const fetchDevices = async () => {
+    try {
+      setLoading(true);
+      const page = currentPage;
+      const data = await deviceService.fetchDevices(page, limit);
+      const pagination = data.data.pagination;
+      // console.log("DEVICES::::::::: ", data.data.data);
+      setDevices(data.data.data);
+      setTotalPages(pagination.totalPages);
+      setCurrentPage(pagination.page);
+      setLimit(pagination.limit);
+      setTotal(pagination.total);
+    } catch (error) {
+      console.error("Failed to fetch devices", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchRecords = async () => {
     try {
       setLoading(true);
@@ -73,6 +102,7 @@ export default function Employees() {
       const data = await employeeService.fetchEmployees(page, limit);
       const pagination = data.data.pagination;
       setEmployees(data.data.data);
+      console.log("EMPLOYEES::::::::: ", data.data.data);
       setTotalPages(pagination.totalPages);
       setCurrentPage(pagination.page);
       setLimit(pagination.limit);
@@ -86,6 +116,7 @@ export default function Employees() {
 
   useEffect(() => {
     fetchRecords();
+    fetchDevices();
   }, [currentPage]);
 
   const handlePageClick = useCallback(
@@ -286,7 +317,93 @@ export default function Employees() {
 
   const handleInitiateDeviceAssignment = (item: Employee) => {
     setEmployee(item);
+
+    console.log("CHOSEN :::::: ", item);
+
+    const recommended: any =
+      devices.find(
+        (d) =>
+          d.status === "AVAILABLE" &&
+          d.location.toUpperCase() === item.officeLocation.toUpperCase() &&
+          !item.role
+      ) ||
+      devices.find(
+        (d) =>
+          d.status === "AVAILABLE" &&
+          d.location.toUpperCase() === item.officeLocation.toUpperCase()
+      );
+
+    setRecommendedDevice(recommended);
+
     setAssignDevice(true);
+  };
+
+  // DEVICE
+  const filteredDevices = devices.filter(
+    (device) =>
+      device.location.toLowerCase().includes(searchDeviceTerm.toLowerCase()) ||
+      device.status.toLowerCase().includes(searchDeviceTerm.toLowerCase()) ||
+      device.manufacturer
+        .toLowerCase()
+        .includes(searchDeviceTerm.toLowerCase()) ||
+      device.model.toLowerCase().includes(searchDeviceTerm.toLowerCase()) ||
+      device.processor.toLowerCase().includes(searchDeviceTerm.toLowerCase()) ||
+      device.screenSize.toLowerCase().includes(searchDeviceTerm.toLowerCase())
+  );
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    setTouchStart(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStart === null) return;
+    const diff = e.changedTouches[0].clientX - touchStart;
+    if (diff > 50) {
+      setCurrentImage((prev) =>
+        prev === 0 ? recommendedDevice!.images.length - 1 : prev - 1
+      );
+    } else if (diff < -50) {
+      setCurrentImage((prev) =>
+        prev === recommendedDevice!.images.length - 1 ? 0 : prev + 1
+      );
+    }
+    setTouchStart(null);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (recommendedDevice) {
+        setCurrentImage((prev) => (prev + 1) % recommendedDevice.images.length);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [recommendedDevice]);
+
+  const handleAssignDevice = async () => {
+    try {
+      const response = await employeeService.assignDeviceToEmployee({
+        employeeId: employee?.id,
+        deviceId: recommendedDevice?.id,
+        assignedOn: new Date(),
+        assignedById: user?.id,
+        remark: "You have been assigned a new device",
+      });
+
+      if (response.status === 201) {
+        toast.success(response.message);
+        setEmployee(response.data);
+        fetchRecords();
+        handleResetForm();
+        setAssignDevice(false);
+      } else {
+        toast.success(response.message);
+      }
+    } catch (error: any) {
+      console.log("error :::: ", error);
+      toast.error(error.message || "failed to create account");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -540,54 +657,73 @@ export default function Employees() {
         {employee && (
           <>
             <div className="flex flex-col space-y-2 mb-6">
-              <div className="w-[200px] h-[200px]">
-                <Image
-                  src={employee?.avatar}
-                  alt="User"
-                  width={200}
-                  height={200}
-                  className="object-contain"
-                />
+              <div className="grid grid-cols-2 gap-5">
+                <div className="col-span-2 md:col-span-1">
+                  <Image
+                    src={employee?.avatar}
+                    alt="User"
+                    width={400}
+                    height={400}
+                    className="object-contain"
+                  />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <Detail label="Email" value={employee?.email} />
+                  <Detail label="First Name" value={employee?.firstName} />
+                  <Detail label="Last Name" value={employee?.lastName} />
+                  <Detail
+                    label="Office Location"
+                    value={employee?.officeLocation}
+                  />
+                  <Detail
+                    label="Onboarded On"
+                    value={`${employee?.onboardingDate} `}
+                  />
+                  <Detail label="Staff ID" value={`${employee?.staffId}`} />
+                </div>
               </div>
 
-              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <Detail label="Email" value={employee?.email} />
-                <Detail label="First Name" value={employee?.firstName} />
-                <Detail label="Last Name" value={employee?.lastName} />
-                <Detail
-                  label="Office Location"
-                  value={employee?.officeLocation}
-                />
-                <Detail
-                  label="Onboarded On"
-                  value={`${employee?.onboardingDate} `}
-                />
-                <Detail label="Staff ID" value={`${employee?.staffId}`} />
-                {employee.devices.length > 0 && (
-                  <>
-                    <Detail
-                      label="Device Model"
-                      value={`${employee?.devices[0].device.model}`}
-                    />
-                    <Detail
-                      label="Device Manufacturer"
-                      value={`${employee?.devices[0].device.manufacturer}`}
-                    />
-                    <Detail
-                      label="Device Processor"
-                      value={`${employee?.devices[0].device.processor}`}
-                    />
-                    <Detail
-                      label="Device Storage"
-                      value={`${employee?.devices[0].device.storage}`}
-                    />
-                    <Detail
-                      label="Device RAM"
-                      value={`${employee?.devices[0].device.ram}`}
-                    />
-                  </>
-                )}
-              </div>
+              {employee.devices.map((item, index) => (
+                <div key={index}>
+                  <div className="grid grid-cols-1 gap-5">
+                    <div className="col-span-2 md:col-span-1">
+                      <Detail
+                        label="Device Model"
+                        value={`${item.device.model}`}
+                      />
+                    </div>
+                    <div className="col-span-2 md:col-span-1">
+                      <Detail
+                        label="Device Manufacturer"
+                        value={`${item.device.manufacturer}`}
+                      />
+                    </div>
+                    <div className="col-span-2 md:col-span-1">
+                      <Detail
+                        label="Device Processor"
+                        value={`${item.device.processor}`}
+                      />
+                    </div>
+                    <div className="col-span-2 md:col-span-1">
+                      <Detail
+                        label="Device Storage"
+                        value={`${item.device.storage}`}
+                      />
+                      <Detail label="Device RAM" value={`${item.device.ram}`} />
+                    </div>
+                  </div>
+
+                  {item.device.images.map((image, index) => (
+                    <div key={index} className="flex flex-row space-x-5">
+                      <img
+                        src={image}
+                        alt={`img`}
+                        className="h-[220px] w-[220px] object-cover rounded shadow"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
           </>
         )}
@@ -597,9 +733,119 @@ export default function Employees() {
         isOpen={assignDevice}
         onClose={() => setAssignDevice(false)}
         title={"Device Assignment"}
-        isSingleButton={true}
+        buttonText={`Continue with ${recommendedDevice?.manufacturer} 
+              ${recommendedDevice?.model}`}
+        isProcessing={isProcessing}
+        onClick={handleAssignDevice}
       >
-        Device Assignment is here
+        <div className="flex flex-col space-y-6">
+          <div className="">
+            <Text text="Recommended Device" weight="font-bold" mb="mb-1" />
+            <Text text="Based on the Designer role and Ireland location" />
+          </div>
+
+          {recommendedDevice && (
+            <>
+              <div
+                className="relative h-64 sm:h-80 bg-gray-100 overflow-hidden"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
+                <img
+                  src={recommendedDevice?.images[currentImage]}
+                  alt="Device"
+                  className="w-full h-full object-cover transition duration-300 ease-in-out"
+                />
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+                  {recommendedDevice?.images.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full ${
+                        index === currentImage ? "bg-white" : "bg-gray-400"
+                      }`}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="p-6 space-y-3">
+                <h2 className="text-xl font-semibold">
+                  {recommendedDevice?.manufacturer}
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Model: {recommendedDevice?.model}
+                </p>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <p>
+                    <strong>Processor:</strong> {recommendedDevice?.processor}
+                  </p>
+                  <p>
+                    <strong>RAM:</strong> {recommendedDevice?.ram}GB
+                  </p>
+                  <p>
+                    <strong>Storage:</strong> {recommendedDevice?.storage}GB
+                  </p>
+                  <p>
+                    <strong>Screen:</strong> {recommendedDevice?.screenSize}"
+                  </p>
+                  <p>
+                    <strong>Location:</strong> {recommendedDevice?.location}
+                  </p>
+                  <p>
+                    <strong>Units:</strong> {recommendedDevice?.totalUnits}
+                  </p>
+                </div>
+                <div className="flex flex-row justify-center items-center space-x-5 mt-10">
+                  <Button
+                    isProcessing={isProcessing}
+                    isDisabled={isProcessing}
+                    onClick={handleAssignDevice}
+                  >
+                    Assign this device
+                  </Button>
+                  <Text text="Or browse all available devices below" />
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="grid grid-cols-3 gap-5">
+            <div className="col-span-3 md:col-span-1 pt-6">
+              <InputField
+                id="search"
+                placeholder={`Search Here`}
+                type="text"
+                hasPrefix={true}
+                prefixIcon={<Search size={18} />}
+                value={searchDeviceTerm}
+                onChange={(e) => setSearchDeviceTerm(e.target.value)}
+              />
+            </div>
+            <div className="col-span-3 md:col-span-1">
+              <SearchableDropdown
+                items={roles}
+                placeholder="Choose role"
+                onSelect={handleSelectRole}
+              />
+            </div>
+            <div className="col-span-3 md:col-span-1">
+              <SearchableDropdown
+                items={roles}
+                placeholder="Choose location"
+                onSelect={handleSelectRole}
+              />
+            </div>
+          </div>
+
+          <OtherDevicesSection
+            devices={devices}
+            excludeId={recommendedDevice?.id}
+            onSelectDevice={(device) => setRecommendedDevice(device)}
+          />
+
+          <div className="my-10">&nbsp;</div>
+        </div>
       </ModalSide>
     </MainLayout>
   );

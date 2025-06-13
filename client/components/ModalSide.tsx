@@ -42,7 +42,7 @@ const ModalSide = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.3 }}
-            className="fixed top-0 right-0 w-full sm:w-[90%] md:w-[70%] lg:w-[50%] h-full bg-light-card dark:bg-dark-card z-50 shadow-lg"
+            className="fixed top-0 right-0 w-full sm:w-[90%] md:w-[70%] lg:w-[60%] h-full bg-light-card dark:bg-dark-card z-50 shadow-lg"
           >
             <div className="flex items-center justify-between p-[17px] shadow-[0_4px_2px_-2px_rgba(0,0,0,0.1)]">
               <Text text={title} isTitleText={true} />

@@ -338,7 +338,11 @@ class EmployeeService {
           onboardedBy: true,
           avatar: true,
           createdAt: true,
-          devices: true,
+          devices: {
+            include: {
+              device: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip,

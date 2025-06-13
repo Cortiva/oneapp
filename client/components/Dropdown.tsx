@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 interface DropdownProps {
   items: { value: string; label: string }[];
   placeholder?: string;
-  label: string;
+  label?: string;
   onSelect: (value: string) => void;
 }
 
