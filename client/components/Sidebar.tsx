@@ -46,7 +46,7 @@ const Sidebar = ({ isShrunk, setIsShrunk }: SidebarProps) => {
     { title: "Dashboard", url: "/", icon: <LayoutDashboard size={18} /> },
     { title: "Employees", url: "/employees", icon: <Users2 size={18} /> },
     { title: "Devices", url: "/devices", icon: <Laptop2 size={18} /> },
-    { title: "IT Managers", url: "/promos", icon: <Users size={18} /> },
+    // { title: "IT Managers", url: "/promos", icon: <Users size={18} /> },
   ];
 
   const handleLogout = async () => {

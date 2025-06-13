@@ -15,6 +15,7 @@ class EmployeeService {
    * @param officeLocation
    * @param onboardedById
    * @param role
+   * @param avatar
    * @returns
    */
   async onboardEmployee(
@@ -31,7 +32,8 @@ class EmployeeService {
       | "SALES"
       | "MARKETING"
       | "HUMAN_RESOURCES"
-      | "FINANCE"
+      | "FINANCE",
+    avatar?: string
   ): Promise<any> {
     try {
       const requiredFields = {
@@ -41,7 +43,7 @@ class EmployeeService {
         staffId: "Staff ID is required",
         phoneNumber: "Phone number is required",
         officeLocation: "Office location is required",
-        onboardedBy: "Onboarded by ID is required",
+        onboardedById: "Onboarded by ID is required",
         role: "Role is required",
       };
       const errors = utils.validateRequiredFields(requiredFields, {
@@ -94,6 +96,7 @@ class EmployeeService {
           officeLocation,
           onboardedById,
           role,
+          avatar,
         },
       });
 
@@ -307,9 +310,7 @@ class EmployeeService {
       const skip = (page - 1) * limit;
 
       // Base where clause
-      const where: any = {
-        isDeleted: false,
-      };
+      const where: any = {};
 
       // Add search condition if searchTerm is provided
       if (searchTerm) {

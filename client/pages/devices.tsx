@@ -18,7 +18,7 @@ import { Edit, Eye, Image, Plus, Search, Trash } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-export default function Home() {
+export default function Devices() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,7 +26,6 @@ export default function Home() {
   const [devices, setDevices] = useState<Device[] | []>([]);
   const [device, setDevice] = useState<Device | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRows, setSelectedRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -78,27 +77,8 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchDevices(currentPage);
-  }, [currentPage]);
-
-  // Select / Deselect logic
-  const toggleSelect = (id: string) => {
-    setSelectedRows((prev: any) => {
-      const newSelection = prev.includes(id)
-        ? prev.filter((item: any) => item !== id)
-        : [...prev, id];
-      return newSelection;
-    });
-  };
-
-  const selectAll = () => {
-    if (selectedRows.length === devices.length) {
-      setSelectedRows([]);
-    } else {
-      const newSelection: any = devices.map((row) => row.id);
-      setSelectedRows(newSelection);
-    }
-  };
+    fetchDevices();
+  }, []);
 
   const handlePageClick = useCallback(
     (page: number) => {
@@ -556,7 +536,7 @@ export default function Home() {
           </div>
 
           <PaginationControls
-            type="talents"
+            type="devices"
             currentPage={currentPage}
             totalPages={totalPages}
             handlePreviousClick={handlePreviousClick}

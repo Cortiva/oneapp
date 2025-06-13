@@ -19,6 +19,7 @@ class EmployeeController {
       officeLocation,
       onboardedById,
       role,
+      avatar,
     } = req.body;
 
     const response = await employeeService.onboardEmployee(
@@ -35,7 +36,8 @@ class EmployeeController {
         | "SALES"
         | "MARKETING"
         | "HUMAN_RESOURCES"
-        | "FINANCE"
+        | "FINANCE",
+      avatar
     );
 
     if (response.success) {

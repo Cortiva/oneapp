@@ -24,7 +24,7 @@ const AppEmptyState: React.FC<AppEmptyStateProps> = ({
 
       <Text text={text} weight="font-semibold" mb="mb-2" isTitleText={true} />
       <Text
-        text={`Use the Add ${page} button above to create a new item or `}
+        text={`Use the Add ${page} button above to create a new record or `}
       />
 
       <div className="mt-4 cursor-pointer">
